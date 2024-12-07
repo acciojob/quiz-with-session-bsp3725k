@@ -2,10 +2,6 @@ const questionsElement = document.getElementById("questions");
 const submitButton = document.getElementById("submit");
 const scoreElement = document.getElementById("score");
 
-// Retrieve user's progress from session storage or initialize an empty object
-const userAnswers = JSON.parse(sessionStorage.getItem("progress")) || {};
-
-//questions are 
 const questions = [
   {
     question: "What is the capital of France?",
@@ -33,6 +29,9 @@ const questions = [
     answer: "Ottawa",
   },
 ];
+// Retrieve user's progress from session storage or initialize an empty object
+const userAnswers = JSON.parse(sessionStorage.getItem("progress")) || {};
+
 // Render the quiz questions and choices
 function renderQuestions() {
   questionsElement.innerHTML = ""; // Clear existing content
@@ -52,7 +51,7 @@ function renderQuestions() {
     // Add the multiple-choice options
     for (let j = 0; j < question.choices.length; j++) {
       const choice = question.choices[j];
-      
+
       // Create a label and input element for each choice
       const choiceLabel = document.createElement("label");
       const choiceElement = document.createElement("input");
@@ -62,13 +61,19 @@ function renderQuestions() {
 
       // Check if the user has previously selected this option
       if (userAnswers[i] === choice) {
-        choiceElement.checked = true;
+        choiceElement.checked = true; // Set the `checked` property
+        choiceElement.setAttribute("checked", "true"); // Set the `checked` attribute (Cypress compatibility)
       }
 
       // Add an event listener to save the user's choice
       choiceElement.addEventListener("change", () => {
         userAnswers[i] = choice;
         sessionStorage.setItem("progress", JSON.stringify(userAnswers));
+
+        // Dynamically update the `checked` attribute for all radio buttons in the group
+        const radios = document.getElementsByName(`question-${i}`);
+        radios.forEach((radio) => radio.removeAttribute("checked"));
+        choiceElement.setAttribute("checked", "true");
       });
 
       // Append the choice input and its label
