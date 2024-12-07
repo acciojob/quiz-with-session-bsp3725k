@@ -1,7 +1,11 @@
-//your JS code here.
+const questionsElement = document.getElementById("questions");
+const submitButton = document.getElementById("submit");
+const scoreElement = document.getElementById("score");
 
-// Do not change code below this line
-// This code will just display the questions to the screen
+// Retrieve user's progress from session storage or initialize an empty object
+const userAnswers = JSON.parse(sessionStorage.getItem("progress")) || {};
+
+//questions are 
 const questions = [
   {
     question: "What is the capital of France?",
@@ -29,28 +33,72 @@ const questions = [
     answer: "Ottawa",
   },
 ];
-
-// Display the quiz questions and choices
+// Render the quiz questions and choices
 function renderQuestions() {
+  questionsElement.innerHTML = ""; // Clear existing content
+
   for (let i = 0; i < questions.length; i++) {
     const question = questions[i];
-    const questionElement = document.createElement("div");
-    const questionText = document.createTextNode(question.question);
-    questionElement.appendChild(questionText);
+
+    // Create a container for the question
+    const questionContainer = document.createElement("div");
+    questionContainer.classList.add("question");
+
+    // Add the question text
+    const questionText = document.createElement("p");
+    questionText.textContent = question.question;
+    questionContainer.appendChild(questionText);
+
+    // Add the multiple-choice options
     for (let j = 0; j < question.choices.length; j++) {
       const choice = question.choices[j];
+      
+      // Create a label and input element for each choice
+      const choiceLabel = document.createElement("label");
       const choiceElement = document.createElement("input");
       choiceElement.setAttribute("type", "radio");
       choiceElement.setAttribute("name", `question-${i}`);
       choiceElement.setAttribute("value", choice);
+
+      // Check if the user has previously selected this option
       if (userAnswers[i] === choice) {
-        choiceElement.setAttribute("checked", true);
+        choiceElement.checked = true;
       }
-      const choiceText = document.createTextNode(choice);
-      questionElement.appendChild(choiceElement);
-      questionElement.appendChild(choiceText);
+
+      // Add an event listener to save the user's choice
+      choiceElement.addEventListener("change", () => {
+        userAnswers[i] = choice;
+        sessionStorage.setItem("progress", JSON.stringify(userAnswers));
+      });
+
+      // Append the choice input and its label
+      choiceLabel.appendChild(choiceElement);
+      choiceLabel.appendChild(document.createTextNode(choice));
+      questionContainer.appendChild(choiceLabel);
     }
-    questionsElement.appendChild(questionElement);
+
+    // Append the question container to the questions element
+    questionsElement.appendChild(questionContainer);
   }
 }
+
+// Handle the submit action
+submitButton.addEventListener("click", () => {
+  let score = 0;
+
+  // Calculate the score
+  for (let i = 0; i < questions.length; i++) {
+    if (userAnswers[i] === questions[i].answer) {
+      score++;
+    }
+  }
+
+  // Display the score
+  scoreElement.textContent = `Your score is ${score} out of ${questions.length}.`;
+
+  // Store the score in local storage
+  localStorage.setItem("score", score);
+});
+
+// Initial render
 renderQuestions();
